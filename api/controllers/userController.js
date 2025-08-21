@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import errorHandler from "../utils/error.js";
 import cloudinary from "../utils/cloudinary.js"; 
-
 export const test = (req, res) => {
   res.json({ message: "Hello from the server" });
 };
@@ -13,14 +12,11 @@ export const updateUser = async (req, res, next) => {
       return next(errorHandler(401, "You can only update your own account"));
 
     if (req.body.password) {
-      req.body.password = bcrypt.hashSync(req.body.password, 10);
-    }
-
-    if (req.body.avatar) {
-      const uploadResult = await cloudinary.uploader.upload(req.body.avatar, {
-        folder: "avatars",
-      });
-      req.body.avatar = uploadResult.secure_url;
+      if (req.body.password.trim() !== "") {
+        req.body.password = bcrypt.hashSync(req.body.password, 10);
+      } else {
+        delete req.body.password; 
+      }
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -34,6 +30,7 @@ export const updateUser = async (req, res, next) => {
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
   } catch (error) {
+    console.error("Update user error:", error);
     next(errorHandler(500, error.message));
   }
 };
