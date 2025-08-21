@@ -8,6 +8,10 @@ import {
   deleteUserStart,
   deleteUserSuccess,
   deleteUserFailure,
+  signOutUserStart,
+  signOutInFailure,
+  signOutUserSuccess,
+  
 } from "../redux/user/userSlice";
 export default function Profile() {
   const fileRef = useRef(null);
@@ -119,6 +123,21 @@ export default function Profile() {
     } catch (error) {
       dispatch(deleteUserFailure(error.message));
     }
+  };
+  const handleSignOut= async () => {
+  try {
+    dispatch(signOutUserStart());
+    const res=await fetch("/api/auth/signout");
+    const data=await res.json();
+    if(data.success===false){
+      dispatch(signOutInFailure());
+     return;
+    }
+    dispatch(signOutUserSuccess(data));
+
+  } catch (error) {
+    dispatch(signOutInFailure());
+  }
   }
   return (
     <div className="p-3 max-w-lg mx-auto">
@@ -179,14 +198,14 @@ export default function Profile() {
         </button>
       </form>
       <div className="flex justify-between mt-5 text-red-600 font-semibold px-2">
-        <button onClick={handleDeleteUser} type="button" className="hover:underline ">
+        <button onClick={handleDeleteUser} type="button" className="hover:underline cursor-pointer ">
           Delete account
         </button>
-        <button type="button" className="hover:underline ">
+        <button onClick={handleSignOut} type="button" className="hover:underline cursor-pointer ">
           Sign out
         </button>
       </div>
-      {/* { <p className="text-red-700 mt-5">{error ? error:'' }</p> } */}
+        {/* <p className="text-red-700 mt-5">{error ? error:'' }</p>  */}
       <p className="text-green-700 mt-5">{updateSucces ? "User is updated successfully":'' }</p>
     </div>
   );
