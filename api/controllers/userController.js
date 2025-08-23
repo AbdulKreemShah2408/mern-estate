@@ -60,3 +60,17 @@ export const getUserListings=async(req,res,next)=>{
   }
 
 }
+export const getContactController = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return next(errorHandler(404, "User not found"));
+    }
+    const { password: _, ...userDetails } = user._doc;
+    return res.status(200).json({
+      user: userDetails,
+    });
+  } catch (error) {
+    next(errorHandler(500, error.message));
+  }
+};
